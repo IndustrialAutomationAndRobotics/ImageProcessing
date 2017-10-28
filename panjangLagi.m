@@ -1,11 +1,11 @@
-ori = imread('C:\Users\computer\Desktop\newim\panjangLagiBaru1.jpeg');
+ori = imread('C:\Users\computer\Desktop\newim\panjangLagiLagi2.jpeg');
 ori = rgb2gray(ori);
-figure, imshow(ori), title('original image');
+%figure, imshow(ori), title('original image');
 
+oriFilter = medfilt2(ori, [50 50]);
+%oriFilter = imsharpen(oriFilter);
 
-oriFilter = imsharpen(ori);
-oriFilter = medfilt2(oriFilter, [20 20]);
-figure, imshow(oriFilter), title('original image after filter');
+%figure, imshow(oriFilter), title('original image after filter');
 
 [~, threshold] = edge(oriFilter, 'sobel');
 fudgeFactor = .5;
@@ -25,7 +25,7 @@ binaryNoBorder = imclearborder(binaryFill, 6);
 
 seD = strel('diamond', 1);
 binaryErode = imerode(binaryNoBorder, seD);
-binaryErode = imerode(binaryErode, seD);
+%binaryErode = imerode(binaryErode, seD);
 %figure, imshow(binaryErode), title('Segmented Image');
 
 binaryOutline = bwperim(binaryErode);
@@ -34,3 +34,56 @@ binaryOutline = bwperim(binaryErode);
 Segout = ori;
 Segout(binaryOutline) = 255;
 %figure, imshow(Segout), title('The outline of the segmented image');
+
+cmp = bwconncomp(binaryErode);
+S = regionprops(cmp, {'BoundingBox'});
+x = S(1). BoundingBox(3);
+y = S(1).BoundingBox(4);
+xRef = S(2).BoundingBox(3);
+yRef = S(2).BoundingBox(4);
+
+pixelToCM = xRef / 5;
+realLength = x / pixelToCM;
+str = sprintf('Length of object = %.2f cm', realLength);
+
+% figure, imshow(Segout)
+% 
+% for i = 1:length(S)
+%     rectangle('Position', [S(i).BoundingBox(1), S(i).BoundingBox(2),S(i).BoundingBox(3),S(i).BoundingBox(4)], 'EdgeColor','r'),
+% end
+% 
+% title(str);
+
+B = bwboundaries(binaryErode,'noholes');
+
+figure,imshow(binaryErode), hold on
+for k = 1 : length(B)
+    b = B{k};
+    
+    plot(b(:,2),b(:,1),'g','linewidth',2);
+end
+hold off
+
+BoundaryRef = B{2};
+BoundaryRefX = BoundaryRef(:,2);
+BoundaryRefY = BoundaryRef(:,1);
+
+MinBoundaryRefX = min(BoundaryRefX);
+MinBoundaryRefY = min(BoundaryRefY);
+MaxBoundaryRefX = max(BoundaryRefX);
+
+[i,j] = find(BoundaryRef == MinBoundaryRefY);
+
+figure, imshow(binaryErode),hold on
+for m = 1 : length(j)
+    l = i(m);
+    n = BoundaryRefX(l);
+    text(n, MinBoundaryRefY, num2str(m), 'backgroundcolor', 'g');
+end
+hold off
+%text(MinBoundaryRefX, MinBoundaryRefY, '1', 'backgroundcolor','g');
+%text(MaxBoundaryRefX, MinBoundaryRefY, '2', 'backgroundcolor','g');
+
+
+
+
