@@ -33,11 +33,11 @@ Segout = ori;
 Segout(binaryOutline) = 255;
 figure, imshow(Segout), title('The outline of the segmented image');
 
+%Find connected component in binary image
 cmp = bwconncomp(binaryErode);
+%Measure properties of image regions
 S = regionprops(cmp, {'BoundingBox'});
-x = S(1).BoundingBox(3);
 y = S(1).BoundingBox(4);
-xRef = S(2).BoundingBox(3);
 yRef = S(2).BoundingBox(4);
 
 pixelToCM = yRef / 5;
@@ -52,6 +52,8 @@ end
 
 title(str);
 
+imContoh = imread('C:\Users\computer\Desktop\panjang.jpg');
+figure, imshow(imContoh), title('example image on actual grid');
 realPixel = 20 * pixelToCM;
 pixelDif = y - realPixel;
 yOffset = pixelDif / 2;
